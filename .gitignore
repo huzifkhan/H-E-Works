@@ -50,3 +50,7 @@ QWEN.md
 .specify/
 history/
 client/.env
+
+# Documentation files (keep locally)
+*.md
+!README.md
