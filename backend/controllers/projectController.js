@@ -8,17 +8,28 @@ const path = require('path');
 // @access  Public
 const getProjects = async (req, res) => {
   try {
-    const { featured, category } = req.query;
-    
+    const { featured, category, limit, offset } = req.query;
+
+    // Validate and sanitize pagination parameters
+    let limitNum = parseInt(limit) || 100; // Default 100
+    let offsetNum = parseInt(offset) || 0;
+
+    // Enforce bounds: limit 1-100, offset >= 0
+    limitNum = Math.max(1, Math.min(limitNum, 100));
+    offsetNum = Math.max(0, offsetNum);
+
     let projects;
     if (featured !== undefined || category) {
-      projects = await Project.findAllActive({ 
-        featured: featured === 'true', 
-        category 
+      projects = await Project.findAllActive({
+        featured: featured === 'true',
+        category
       });
     } else {
       projects = await Project.findAllActive();
     }
+
+    // Apply pagination
+    projects = projects.slice(offsetNum, offsetNum + limitNum);
 
     // Get images for each project
     const projectsWithImages = await Promise.all(
@@ -62,8 +73,18 @@ const getAllProjects = async (req, res) => {
 // @access  Public
 const getProject = async (req, res) => {
   try {
-    const project = await Project.findByIdWithImages(req.params.id);
+    // Validate project ID - must be a positive integer
+    const projectId = parseInt(req.params.id);
     
+    if (isNaN(projectId) || projectId <= 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid project ID. ID must be a positive number.' 
+      });
+    }
+
+    const project = await Project.findByIdWithImages(projectId);
+
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found' });
     }
@@ -71,7 +92,11 @@ const getProject = async (req, res) => {
     res.json({ success: true, data: project });
   } catch (error) {
     console.error('Get project error:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    // Don't expose database errors to client
+    res.status(500).json({ 
+      success: false, 
+      message: 'An error occurred while fetching the project' 
+    });
   }
 };
 

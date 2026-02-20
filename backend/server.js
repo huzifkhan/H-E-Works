@@ -69,6 +69,18 @@ app.use('/api/', limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// JSON parse error handler (must come after express.json())
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.error('JSON parse error:', err.message);
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid JSON format. Please check your request body.',
+    });
+  }
+  next(err);
+});
+
 // CORS middleware
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [process.env.CLIENT_URL, 'https://h-e-works.vercel.app', 'https://h-e-works-du98x2pwk-huzifkhans-projects.vercel.app']
