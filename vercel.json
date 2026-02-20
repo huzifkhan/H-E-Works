@@ -14,18 +14,18 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/api/index.js"
+      "source": "/api/(.*)",
+      "destination": "/backend/api/index.js"
     },
     {
-      "src": "/uploads/(.*)",
-      "dest": "backend/uploads/$1"
+      "source": "/uploads/(.*)",
+      "destination": "/backend/uploads/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "client/$1"
+      "source": "/((?!_next/static|_next/image|favicon.ico).*)",
+      "destination": "/client/index.html"
     }
   ],
   "outputDirectory": "client/dist",
