@@ -64,7 +64,7 @@ app.use(express.urlencoded({ extended: true }));
 // CORS middleware
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
-    ? [process.env.CLIENT_URL, 'https://*.vercel.app', /vercel\.app$/]
+    ? [process.env.CLIENT_URL, 'https://h-e-works.vercel.app', 'https://h-e-works-du98x2pwk-huzifkhans-projects.vercel.app']
     : process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

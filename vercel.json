@@ -24,8 +24,39 @@
       "destination": "/backend/uploads/$1"
     },
     {
-      "source": "/((?!api|uploads|_next/static|_next/image|favicon.ico|assets/).*)",
+      "source": "/assets/(.*)",
+      "destination": "/client/assets/$1"
+    },
+    {
+      "source": "/vite.svg",
+      "destination": "/client/vite.svg"
+    },
+    {
+      "source": "/((?!api|uploads|_next/static|_next/image|favicon.ico).*)",
       "destination": "/client/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://h-e-works.vercel.app"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS, POST, PUT, DELETE"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
     }
   ],
   "github": {
