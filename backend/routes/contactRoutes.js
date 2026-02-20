@@ -49,22 +49,42 @@ const validateContact = [
     .trim()
     .notEmpty().withMessage('Name is required')
     .isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters')
-    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in name'),
+    .custom(value => {
+      if (/[\r\n]/.test(value)) {
+        throw new Error('Invalid characters in name');
+      }
+      return true;
+    }),
   body('email')
     .trim()
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Please provide a valid email')
-    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in email'),
+    .custom(value => {
+      if (/[\r\n]/.test(value)) {
+        throw new Error('Invalid characters in email');
+      }
+      return true;
+    }),
   body('subject')
     .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 2, max: 200 }).withMessage('Subject must be between 2 and 200 characters')
-    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in subject'),
+    .custom(value => {
+      if (value && /[\r\n]/.test(value)) {
+        throw new Error('Invalid characters in subject');
+      }
+      return true;
+    }),
   body('message')
     .trim()
     .notEmpty().withMessage('Message is required')
     .isLength({ min: 10, max: 2000 }).withMessage('Message must be between 10 and 2000 characters')
-    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in message'),
+    .custom(value => {
+      if (/[\r\n]/.test(value)) {
+        throw new Error('Invalid characters in message');
+      }
+      return true;
+    }),
   // Handler to check validation results
   (req, res, next) => {
     const errors = validationResult(req);
