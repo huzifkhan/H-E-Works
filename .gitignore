@@ -44,7 +44,7 @@ temp/
 .vercel
 *.local
 
-# Qwen Code related (keep locally, don't commit)
+# Development tools (keep locally, don't commit)
 .qwen/
 QWEN.md
 .specify/
