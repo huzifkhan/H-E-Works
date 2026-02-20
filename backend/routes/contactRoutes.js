@@ -4,7 +4,6 @@ const { body, validationResult } = require('express-validator');
 const upload = require('../middleware/uploadMiddleware');
 const { submitContactForm } = require('../controllers/contactController');
 const rateLimit = require('express-rate-limit');
-const sanitizeHtml = require('sanitize-html');
 
 // Rate limiting for contact form (5 submissions per hour per IP)
 const contactLimiter = rateLimit({
@@ -18,22 +17,28 @@ const contactLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Simple HTML tag stripper (no external dependencies)
+const stripHtmlTags = (str) => {
+  if (!str) return '';
+  return str.replace(/<[^>]*>/g, '').trim();
+};
+
 // Sanitization middleware - strip all HTML tags
 const sanitizeInput = (req, res, next) => {
   if (req.body.name) {
-    req.body.name = sanitizeHtml(req.body.name, { allowedTags: [] });
+    req.body.name = stripHtmlTags(req.body.name);
   }
   if (req.body.email) {
-    req.body.email = sanitizeHtml(req.body.email, { allowedTags: [] });
+    req.body.email = stripHtmlTags(req.body.email);
   }
   if (req.body.subject) {
-    req.body.subject = sanitizeHtml(req.body.subject, { allowedTags: [] });
+    req.body.subject = stripHtmlTags(req.body.subject);
   }
   if (req.body.message) {
-    req.body.message = sanitizeHtml(req.body.message, { allowedTags: [] });
+    req.body.message = stripHtmlTags(req.body.message);
   }
   if (req.body.phone) {
-    req.body.phone = sanitizeHtml(req.body.phone, { allowedTags: [] });
+    req.body.phone = stripHtmlTags(req.body.phone);
   }
   next();
 };
