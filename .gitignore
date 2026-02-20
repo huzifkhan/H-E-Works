@@ -44,8 +44,9 @@ temp/
 .vercel
 *.local
 
-# Qwen Code specific (optional - remove if you want to share)
+# Qwen Code related (keep locally, don't commit)
 .qwen/
+QWEN.md
 .specify/
 history/
 client/.env
