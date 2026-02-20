@@ -48,3 +48,4 @@ temp/
 .qwen/
 .specify/
 history/
+client/.env
