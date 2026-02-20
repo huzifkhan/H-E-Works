@@ -10,9 +10,12 @@ const getProjects = async (req, res) => {
   try {
     const { featured, category, limit, offset } = req.query;
 
-    // Validate and sanitize pagination parameters
-    let limitNum = parseInt(limit) || 100; // Default 100
-    let offsetNum = parseInt(offset) || 0;
+    // Validate and sanitize pagination parameters (handle array pollution)
+    const limitValue = Array.isArray(limit) ? limit[0] : limit;
+    const offsetValue = Array.isArray(offset) ? offset[0] : offset;
+    
+    let limitNum = parseInt(limitValue) || 100; // Default 100
+    let offsetNum = parseInt(offsetValue) || 0;
 
     // Enforce bounds: limit 1-100, offset >= 0
     limitNum = Math.max(1, Math.min(limitNum, 100));

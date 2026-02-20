@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const upload = require('../middleware/uploadMiddleware');
 const { submitContactForm } = require('../controllers/contactController');
 const rateLimit = require('express-rate-limit');
+const sanitizeHtml = require('sanitize-html');
 
 // Rate limiting for contact form (5 submissions per hour per IP)
 const contactLimiter = rateLimit({
@@ -17,24 +18,48 @@ const contactLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Sanitization middleware - strip all HTML tags
+const sanitizeInput = (req, res, next) => {
+  if (req.body.name) {
+    req.body.name = sanitizeHtml(req.body.name, { allowedTags: [] });
+  }
+  if (req.body.email) {
+    req.body.email = sanitizeHtml(req.body.email, { allowedTags: [] });
+  }
+  if (req.body.subject) {
+    req.body.subject = sanitizeHtml(req.body.subject, { allowedTags: [] });
+  }
+  if (req.body.message) {
+    req.body.message = sanitizeHtml(req.body.message, { allowedTags: [] });
+  }
+  if (req.body.phone) {
+    req.body.phone = sanitizeHtml(req.body.phone, { allowedTags: [] });
+  }
+  next();
+};
+
 // Validation middleware
 const validateContact = [
   body('name')
     .trim()
     .notEmpty().withMessage('Name is required')
-    .isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters'),
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be between 2 and 100 characters')
+    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in name'),
   body('email')
     .trim()
     .notEmpty().withMessage('Email is required')
-    .isEmail().withMessage('Please provide a valid email'),
+    .isEmail().withMessage('Please provide a valid email')
+    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in email'),
   body('subject')
     .optional({ checkFalsy: true })
     .trim()
-    .isLength({ min: 2, max: 200 }).withMessage('Subject must be between 2 and 200 characters'),
+    .isLength({ min: 2, max: 200 }).withMessage('Subject must be between 2 and 200 characters')
+    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in subject'),
   body('message')
     .trim()
     .notEmpty().withMessage('Message is required')
-    .isLength({ min: 10, max: 2000 }).withMessage('Message must be between 10 and 2000 characters'),
+    .isLength({ min: 10, max: 2000 }).withMessage('Message must be between 10 and 2000 characters')
+    .matches(/^[\r\n]/).negate().withMessage('Invalid characters in message'),
   // Handler to check validation results
   (req, res, next) => {
     const errors = validationResult(req);
@@ -100,6 +125,7 @@ router.post(
   '/',
   contactLimiter, // Rate limit MUST come first
   upload.array('attachments', 5), // Max 5 files - MUST be before validation to parse multipart
+  sanitizeInput, // Sanitize HTML BEFORE validation
   validateContact,
   validateRecaptcha,
   submitContactForm
