@@ -14,49 +14,20 @@
       "use": "@vercel/node"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/backend/api/index.js"
+      "src": "/api/(.*)",
+      "dest": "/backend/api/index.js"
     },
     {
-      "source": "/uploads/(.*)",
-      "destination": "/backend/uploads/$1"
-    },
-    {
-      "source": "/assets/(.*)",
-      "destination": "/client/assets/$1"
-    },
-    {
-      "source": "/vite.svg",
-      "destination": "/client/vite.svg"
-    },
-    {
-      "source": "/((?!api|uploads|_next/static|_next/image|favicon.ico).*)",
-      "destination": "/client/index.html"
+      "src": "/uploads/(.*)",
+      "dest": "/backend/uploads/$1"
     }
   ],
-  "headers": [
+  "rewrites": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://h-e-works.vercel.app"
-        },
-        {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, OPTIONS, POST, PUT, DELETE"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
+      "source": "/((?!api|uploads|_next).*)",
+      "destination": "/client/index.html"
     }
   ],
   "github": {
