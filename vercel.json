@@ -32,6 +32,10 @@
       "destination": "/client/vite.svg"
     },
     {
+      "source": "/",
+      "destination": "/client/index.html"
+    },
+    {
       "source": "/:path*",
       "destination": "/client/index.html"
     }
