@@ -20,7 +20,7 @@ const convertToCamelCase = (obj) => {
 // @access  Public
 const submitContactForm = async (req, res) => {
   try {
-    const { name, email, phone, subject, message } = req.body;
+    const { name, email, phone, subject = '', message } = req.body;
 
     // Handle file attachments
     let attachments = [];
@@ -38,7 +38,7 @@ const submitContactForm = async (req, res) => {
       name,
       email,
       phone: phone || '',
-      subject,
+      subject: subject || '',
       message,
       ipAddress: req.ip || req.connection.remoteAddress || '',
       userAgent: req.get('user-agent') || '',
