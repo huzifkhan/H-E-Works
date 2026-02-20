@@ -1,12 +1,15 @@
 node_modules
 .env
 .env.local
+.env.production
 .git
 .gitignore
 *.md
 .DS_Store
-client
 history
 specs
 .qwen
 .vscode
+backend/node_modules
+backend/uploads/*
+!backend/uploads/.gitkeep
