@@ -1,7 +1,34 @@
 import { CheckCircle, Award, Target, Lightbulb, Users, Globe, Heart, Shield } from 'lucide-react';
 import SEO from '../components/common/SEO';
+import { images } from '../utils/images';
 
 const About = () => {
+  const team = [
+    {
+      name: 'John Smith',
+      role: 'CEO & Founder',
+      bio: '15+ years in engineering leadership',
+      image: images.professional1,
+    },
+    {
+      name: 'Sarah Johnson',
+      role: 'Chief Operating Officer',
+      bio: 'Expert in operations management',
+      image: images.professional2,
+    },
+    {
+      name: 'Michael Chen',
+      role: 'Head of Engineering',
+      bio: 'Specialist in structural engineering',
+      image: images.professional3,
+    },
+    {
+      name: 'Emily Davis',
+      role: 'Project Director',
+      bio: '10+ years managing large-scale projects',
+      image: images.professional4,
+    },
+  ];
   const stats = [
     { value: '15+', label: 'Years of Excellence', sub: 'Since 2010' },
     { value: '500+', label: 'Projects Delivered', sub: 'Successfully completed' },

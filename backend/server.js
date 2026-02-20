@@ -4,7 +4,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-require('dotenv').config();
+
+// Don't load dotenv in production (Vercel handles env vars)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const { pool } = require('./config/db');
 const createTables = require('./config/initDB');
@@ -33,12 +37,12 @@ const initializeDatabase = async () => {
     // Test connection
     await pool.query('SELECT NOW()');
     console.log('✅ Connected to Neon PostgreSQL');
-    
+
     // Create tables
     await createTables();
   } catch (error) {
     console.error('❌ Database initialization failed:', error.message);
-    process.exit(1);
+    throw error; // Don't exit process in serverless
   }
 };
 
@@ -59,8 +63,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CLIENT_URL, 'https://*.vercel.app', /vercel\.app$/] 
+  origin: process.env.NODE_ENV === 'production'
+    ? [process.env.CLIENT_URL, 'https://*.vercel.app', /vercel\.app$/]
     : process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -123,46 +127,56 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Only start server and schedule jobs if running directly (not in serverless)
+let serverInstance = null;
 
-// Weekly digest scheduler (every Monday at 9 AM)
-const scheduleWeeklyDigest = () => {
-  const sendWeeklyDigest = async () => {
-    try {
-      const { sendWeeklyDigest: sendDigest } = require('./controllers/weeklyDigestController');
-      await sendDigest();
-    } catch (error) {
-      console.error('Scheduled weekly digest failed:', error);
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+
+  // Weekly digest scheduler (every Monday at 9 AM)
+  const scheduleWeeklyDigest = () => {
+    const sendWeeklyDigest = async () => {
+      try {
+        const { sendWeeklyDigest: sendDigest } = require('./controllers/weeklyDigestController');
+        await sendDigest();
+      } catch (error) {
+        console.error('Scheduled weekly digest failed:', error);
+      }
+    };
+
+    // Calculate time until next Monday 9 AM
+    const now = new Date();
+    const nextMonday = new Date(now);
+    nextMonday.setDate(now.getDate() + (7 - now.getDay()) % 7);
+    nextMonday.setHours(9, 0, 0, 0);
+
+    if (nextMonday <= now) {
+      nextMonday.setDate(nextMonday.getDate() + 7);
     }
+
+    const delay = nextMonday.getTime() - now.getTime();
+
+    console.log(`📅 Weekly digest scheduled for ${nextMonday.toLocaleString()} (in ${Math.round(delay / (1000 * 60 * 60))} hours)`);
+
+    setTimeout(() => {
+      sendWeeklyDigest();
+      // Then repeat every 7 days
+      setInterval(sendWeeklyDigest, 7 * 24 * 60 * 60 * 1000);
+    }, delay);
   };
 
-  // Calculate time until next Monday 9 AM
-  const now = new Date();
-  const nextMonday = new Date(now);
-  nextMonday.setDate(now.getDate() + (7 - now.getDay()) % 7);
-  nextMonday.setHours(9, 0, 0, 0);
-  
-  if (nextMonday <= now) {
-    nextMonday.setDate(nextMonday.getDate() + 7);
-  }
-
-  const delay = nextMonday.getTime() - now.getTime();
-  
-  console.log(`📅 Weekly digest scheduled for ${nextMonday.toLocaleString()} (in ${Math.round(delay / (1000 * 60 * 60))} hours)`);
-  
-  setTimeout(() => {
-    sendWeeklyDigest();
-    // Then repeat every 7 days
-    setInterval(sendWeeklyDigest, 7 * 24 * 60 * 60 * 1000);
-  }, delay);
-};
-
-// Initialize database and start server
-initializeDatabase().then(() => {
-  scheduleWeeklyDigest();
-  app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  // Initialize database and start server
+  initializeDatabase().then(() => {
+    scheduleWeeklyDigest();
+    serverInstance = app.listen(PORT, () => {
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    });
   });
-});
+}
 
+// Export for serverless (Vercel)
 module.exports = app;
+
+// Export pool for serverless initialization
+module.exports.pool = pool;
+module.exports.initializeDatabase = initializeDatabase;
