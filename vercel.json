@@ -22,10 +22,6 @@
     {
       "source": "/uploads/(.*)",
       "destination": "/backend/uploads/$1"
-    },
-    {
-      "source": "/((?!api|uploads|_next).*)",
-      "destination": "/client/index.html"
     }
   ],
   "github": {
