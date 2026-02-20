@@ -70,13 +70,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
-const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? [process.env.CLIENT_URL, 'https://h-e-works.vercel.app', 'https://h-e-works-du98x2pwk-huzifkhans-projects.vercel.app']
-    : process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.CLIENT_URL, 'https://h-e-works.vercel.app', 'https://h-e-works-du98x2pwk-huzifkhans-projects.vercel.app']
+  : [process.env.CLIENT_URL || 'http://localhost:5173'];
+
+const corsOptions = (req, callback) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+    callback(null, {
+      origin: true,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    });
+  } else {
+    callback(null, { origin: false });
+  }
 };
 app.use(cors(corsOptions));
 
