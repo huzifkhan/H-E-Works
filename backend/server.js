@@ -47,7 +47,15 @@ const initializeDatabase = async () => {
 };
 
 // Security middleware
-app.use(helmet());
+// Disable helmet in serverless environment to avoid header conflicts
+if (process.env.VERCEL !== '1') {
+  app.use(helmet());
+} else {
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }));
+}
 
 // Rate limiting
 const limiter = rateLimit({
