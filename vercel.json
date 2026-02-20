@@ -24,15 +24,15 @@
       "destination": "/backend/uploads/$1"
     },
     {
-      "source": "/((.*)\\.(js|css|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot))",
-      "destination": "/client/$1"
+      "source": "/assets/:path*",
+      "destination": "/client/assets/:path*"
     },
     {
       "source": "/vite.svg",
       "destination": "/client/vite.svg"
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "destination": "/client/index.html"
     }
   ],
